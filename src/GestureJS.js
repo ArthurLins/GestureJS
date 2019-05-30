@@ -59,7 +59,7 @@ class GestureJS {
         }
     }
 
-    isMap(dist, map){
+    evaluateOne(dist, map){
         var ine = this.removeConsecutiveNumbers(dist);
         var score = 0;
         var consecutiveUnmatch = false;
@@ -84,9 +84,20 @@ class GestureJS {
         
         old_min -= (1 + (3 * dist.length));
 
-        return (( score - old_min )/(old_max - old_min)) * 1;
+        return ((score - old_min)/(old_max - old_min)) * 1;
     }
 
+    evaluate(dist, maps){
+        var total = 0;
+        for(var q = 0; q < maps.length; q++){
+            var map = maps[q];
+            total += this.evaluateOne(dist, map);
+        }
+        if (total === 0){
+            return 0;
+        }
+        return total/maps.length;
+    }
 
     stop(){
         var self = this;
@@ -95,7 +106,7 @@ class GestureJS {
             this.processTrain(processedMoves);
         } else {
             this.binds.forEach((bind)=>{
-                var confidence = self.isMap(processedMoves, bind[0]);
+                var confidence = self.evaluate(processedMoves, bind[0]);
                 if (confidence >= bind[1]){
                     if (typeof bind[2] === "function"){
                         bind[2](confidence);
