@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html>
+    <head>
+
+        <style>
+            body {
+            color: hsl(0, 0%, 80%);
+            background-color: hsl(0, 0%, 10%);
+            }
+            .magia{
+                width: 100px;
+                height: 100px;
+            }
+            .selected {
+                border: solid 10px;
+            }
+        </style>
+    </head>
+    <body>            
+        <h2>Modo treinamento</h2>
+        <div id="state">
+
+            <h3>Segure qualquer botão do Mouse para desenhar. Caso o desenho esteja correto aperte "S" para salvar se não "D" pra deletar</h3>
+            <h4 id="st">Aguardando...</h4>
+        </div>
+        <div id="result" hidden>
+        </div>
+
+        <script src="src/GestureJS.js"></script>
+        <script>
+
+        var g = new GestureJS(30);
+        var drawelems = [];
+        var samplesQtd = 25;
+        var actualSamples = 0;
+
+        var finished = false;
+
+        g.enableTrain(samplesQtd);
+
+        g.onTrainFinished((r)=>{
+            finished = true;
+            document.getElementById("state").hidden = true;
+            document.getElementById("result").innerHTML = "Treinamento concluido o codigo abaixo: <br> <pre>"+JSON.stringify(r)+"</pre>";
+            document.getElementById("result").hidden = false;
+
+        });
+
+        window.onkeydown = function(event){
+            if (drawing){
+                return;
+            }
+            if (event.key == 's'){              
+                drawelems.forEach((e)=>{
+                    document.body.removeChild(e);
+                });
+                drawelems = [];
+                actualSamples++;
+                document.getElementById("st").innerHTML = "Salvo! "+actualSamples+"/"+samplesQtd;
+                g.stop();
+            }
+            if (event.key == 'd'){
+                drawelems.forEach((e)=>{
+                    document.body.removeChild(e);
+                });
+                drawelems = [];
+                document.getElementById("st").innerHTML = "Deletado!"
+                g.start();
+            }
+        }
+
+        var drawing = false;
+
+        window.onmousedown = function(){
+            if (drawing){
+                return;
+            }
+            g.start();
+            drawing = true;
+        }
+
+        window.onmouseup = function(){
+            if (!drawing){
+                return;
+            }
+            drawing = false;
+        }
+
+        var mouseEvent = null;
+        document.onmousemove = function(event){
+            mouseEvent = event;
+        }
+        setInterval(()=>{
+            if (!drawing || mouseEvent === null){
+                return; 
+            }
+            g.store(mouseEvent.clientX, mouseEvent.clientY);
+        }, 5);
+
+        //Funy
+        // https://codepen.io/anon/pen/eaPZbQ
+        window.addEventListener('mousemove', function(e) {
+            if (!drawing){
+                return;
+            }
+            if (finished){
+                return;
+            }
+            [1, .9, .8, .5, .1].forEach(function(i) {
+                var j = (1 - i) * 50;
+                var elem = document.createElement('div');
+                var size = "10px";//Math.ceil(Math.random() * 10 * i) + 'px';
+                elem.style.position = 'fixed';
+                elem.style.top = e.pageY +"px"//+ Math.round(Math.random() * j - j / 2) + 'px';
+                elem.style.left = e.pageX+"px" //+ Math.round(Math.random() * j - j / 2) + 'px';
+                elem.style.width = size;
+                elem.style.height = size;
+                elem.style.background = 'white';
+                elem.style.borderRadius = size;
+                elem.style.pointerEvents = 'none';
+                document.body.appendChild(elem);
+                drawelems.push(elem);
+            });
+        }, false);
+
+
+        </script>
+    </body>
+</html>
