@@ -1,6 +1,6 @@
 
 ## How it works?
-
+Example: https://arthurlins.github.io/GestureJS/index.html
 
 ## Setup Recognition Mode
 ```javascript
